@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RTSP_STREAM</title>
+  </head>
+  <body>
+    <div id="rtsp_movie" class="grid-item">
+      <canvas id="canvas" width="800" height="600"></canvas>
+    </div>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+      integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
+      crossorigin="anonymous"
+    ></script>
+    <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript">
+      $(function () {
+        const socket = io(
+          window.location.protocol +
+            "//" +
+            document.domain +
+            ":" +
+            window.location.port +
+            "/web",
+          {
+            reconnection: false, // whether to reconnect automatically
+          }
+        );
+
+        socket.on("connect", function () {
+          console.log("Connected");
+        });
+
+        socket.on("disconnect", () => {
+          console.log("Disconnected");
+        });
+
+        socket.on("connect_error", (error) => {
+          console.log("Connect error! " + error);
+        });
+
+        socket.on("connect_timeout", (error) => {
+          console.log("Connect timeout! " + error);
+        });
+
+        socket.on("error", (error) => {
+          console.log("Error! " + error);
+        });
+
+        $(document).ready(function () {
+          socket.emit("video feed");
+        });
+        socket.on("stream", (data) => {
+          var ctx = document.getElementById("canvas").getContext("2d");
+          ctx.width = 800;
+          ctx.height = 600;
+          console.log(data.image);
+          var img1 = new Image();
+          img1.onload = function () {
+            ctx.drawImage(img1, 0, 0);
+          };
+          img1.src = data.image;
+        });
+      });
+    </script>
+  </body>
+</html>
